@@ -2,18 +2,44 @@
 name = "sqlite2pg"
 version = "0.1.0"
 description = "A module designed to aid in migrating databases from Sqlite3 to Postgresql."
-authors = ["Jonxslays"]
 license = "BSD-3-Clause"
+homepage = "https://github.com/Jonxslays/sqlite2pg"
+repository = "https://github.com/Jonxslays/sqlite2pg"
+authors = ["Jonxslays"]
+readme = "README.md"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "License :: OSI Approved :: BSD License",
+    "Framework :: Pytest",
+    "Framework :: nox",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: System Administrators",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Topic :: Database",
+    "Typing :: Typed",
+]
 
 [tool.poetry.scripts]
 sqlite2pg = "sqlite2pg.cli:main"
 
 [tool.poetry.dependencies]
-python = ">=3.8"
+python = ">=3.8,<=3.10"
+aiosqlite = "^0.17.0"
+asyncpg = "^0.24.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.8b0"
 mypy = "^0.910"
+pytest = "^6.2.5"
+nox = "^2021.6.12"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
