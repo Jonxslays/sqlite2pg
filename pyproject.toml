@@ -28,7 +28,7 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-sqlite2pg = "sqlite2pg.cli:main"
+sqlite2pg = "sqlite2pg.__main__:main"
 
 [tool.poetry.dependencies]
 python = ">=3.6,<=3.10"

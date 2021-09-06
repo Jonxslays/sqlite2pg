@@ -4,23 +4,23 @@ import typing
 
 
 __all__: typing.List[str] = [
-    "Logger",
+    "LogConfig",
 ]
 
 
 DEFAULT_LOG_FILE: str = f"./slqlite2pg-{time.time():.0f}.log"
 
 
-class Logger(logging.Logger):
+class LogConfig(logging.Logger):
     """Logging for the program."""
 
     __slots__: typing.Sequence[str] = ()
 
-    @staticmethod
     def new(
+        file_path: str = "",
+        *,
         stream_level: int = logging.INFO,
         file_level: int = logging.DEBUG,
-        file_path: str = None,
     ) -> logging.Logger:
         """Initializes a new logger object and returns it.
 

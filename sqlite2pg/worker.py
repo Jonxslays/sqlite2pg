@@ -1,9 +1,10 @@
+import logging
 import os
 import sqlite3
 import time
 import typing
 
-from sqlite2pg.modules import Logger
+from sqlite2pg import CommandHandler
 
 __all__: typing.List[str] = [
     "Worker",
@@ -19,15 +20,20 @@ class Worker:
     """The object that carries the workload of the program.
 
     Args:
-        logger: sqlite2pg.Logger
+        logger: logging.Logger
             The logger to use for the worker. This logger will be
             supplied automatically by the command line entry point.
     """
 
-    __slots__: typing.Sequence[str] = ("log", "test_sqlite_db")
+    __slots__: typing.Sequence[str] = (
+        "log",
+        "test_sqlite_db",
+        "handler",
+    )
 
-    def __init__(self, logger: Logger) -> None:
-        self.log = logger
+    def __init__(self, logger: logging.Logger) -> None:
+        self.handler = handler,
+        self.log: logging.Logger = handler.log
         self.log.debug("worker initialized...")
         self.test_sqlite_db = "./database.db3"
 
@@ -79,7 +85,7 @@ class Worker:
             exit(1)
 
         else:
-            self.log.debug("connection secured. continuing...")
+            self.log.info(f"connection to '{db}' secured.")
 
         # Iterate through table names.
         for table in [d[0] for d in cur.fetchall()]:
@@ -94,7 +100,8 @@ class Worker:
             )
 
             # If there is no schema, error.
-            if not (data := cur.fetchall()):
+            data = cur.fetchall()
+            if not data:
                 self.log.error(f"found '{table}' but no schema. exiting...")
                 exit(1)
 
@@ -119,6 +126,7 @@ class Worker:
         conn.close()
 
         end: float = time.time()
+        print()
 
         for s in clean_schema.values():
             print(f"{s[0]}\n")
@@ -169,11 +177,12 @@ class Worker:
         end: float = time.time()
 
         print(
-            f"converted {len(schema)} tables in {(end - start) * 1000:.4f} ms. Obtained new schema."
+            f"converted {len(schema)} tables in {(end - start) * 1000:.4f} ms. obtained new schema."
         )
+        print()
 
         for s in schema.values():
-            print(f"\n{s[0]}")
+            print(f"{s[0]}\n")
 
         return schema
 
@@ -228,6 +237,9 @@ class Worker:
 
         # Validate the converted schema is correct
         self.validate_input("does the converted schema look correct [y/n]: ")
+
+        print("No further logic is implemented.")
+        exit(0)
 
         # TODO
         # Connect to postgres
