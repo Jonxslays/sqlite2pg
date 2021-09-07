@@ -4,7 +4,9 @@ import sqlite3
 import time
 import typing
 
-from sqlite2pg import CommandHandler
+from loguru import logger
+
+from sqlite2pg.modules import sqlite
 
 __all__: typing.List[str] = [
     "Worker",
@@ -26,15 +28,11 @@ class Worker:
     """
 
     __slots__: typing.Sequence[str] = (
-        "log",
         "test_sqlite_db",
-        "handler",
     )
 
-    def __init__(self, logger: logging.Logger) -> None:
-        self.handler = handler,
-        self.log: logging.Logger = handler.log
-        self.log.debug("worker initialized...")
+    def __init__(self) -> None:
+        logger.debug("worker initialized...")
         self.test_sqlite_db = "./database.db3"
 
     def get_sqlite_schema(self, db: str) -> CleanSchemaT:
@@ -54,11 +52,11 @@ class Worker:
 
         # Validate that the database file exists
         if not os.path.isfile(db):
-            self.log.error(f"can't connect to '{db}', the file doesnt exist.")
+            logger.error(f"can't connect to '{db}', the file doesnt exist.")
             exit(1)
 
         # Connect to the database, and obtain a cursor.
-        self.log.debug(f"connecting to: '{db}'.")
+        logger.debug(f"connecting to: '{db}'.")
         conn: sqlite3.Connection = sqlite3.connect(db)
         cur: sqlite3.Cursor = conn.cursor()
 
@@ -67,51 +65,42 @@ class Worker:
         clean_schema: CleanSchemaT = {}
 
         try:
-            self.log.debug("attempting to fetch tables from sqlite master.")
+            logger.debug("attempting to fetch tables from sqlite master.")
 
             # Gather all table names
-            cur.execute(
-                """SELECT name FROM sqlite_master
-                WHERE type IS 'table'
-                AND name NOT LIKE 'sqlite_%'
-                ORDER BY 1
-                """
-            )
+            cur.execute(sqlite.get_tables())
 
         # We were unable to fetch the data, likely it was not a database.
         except sqlite3.DatabaseError as e:
-            self.log.debug(f"{e.__class__.__name__}: {e}")
-            self.log.error(f"'{db}' is not a database. exiting...")
+            logger.debug(f"{e.__class__.__name__}: {e}")
+            logger.error(f"'{db}' is not a database. exiting...")
             exit(1)
 
         else:
-            self.log.info(f"connection to '{db}' secured.")
+            logger.info(f"connection to '{db}' secured.")
 
         # Iterate through table names.
         for table in [d[0] for d in cur.fetchall()]:
-            self.log.info(f"fetching schema for '{table}'.")
+            logger.info(f"fetching schema for '{table}'.")
 
             # Gather the schema for that table.
-            cur.execute(
-                f"""SELECT sql
-                FROM sqlite_master
-                WHERE name='{table}'
-                """
-            )
+            cur.execute(sqlite.get_schema(table))
 
             # If there is no schema, error.
             data = cur.fetchall()
             if not data:
-                self.log.error(f"found '{table}' but no schema. exiting...")
+                logger.error(f"found '{table}' but no schema. exiting...")
+                conn.close()
                 exit(1)
 
             # Assign that schema to our schema dict.
-            self.log.debug(f"found schema for '{table}'.")
+            logger.debug(f"found schema for '{table}'.")
             raw_schema[table] = data
 
         # We didn't find tables or schema.
         if not raw_schema:
-            self.log.error("no tables found. exiting...")
+            logger.error("no tables found. exiting...")
+            conn.close()
             exit(1)
 
         # Replace tabs with 4 spaces and create
@@ -122,7 +111,7 @@ class Worker:
             clean_schema[t] = [q[0][0].replace("\t", "    ")]
 
         # Close the connection to sqlite
-        self.log.debug(f"closed connection to sqlite: '{db}'.")
+        logger.debug(f"closed connection to sqlite: '{db}'.")
         conn.close()
 
         end: float = time.time()
@@ -131,7 +120,7 @@ class Worker:
         for s in clean_schema.values():
             print(f"{s[0]}\n")
 
-        self.log.info(
+        logger.info(
             f"found {len(clean_schema)} tables and schema in {(end - start) * 1000:.4f} ms."
         )
 
@@ -151,7 +140,7 @@ class Worker:
         """
 
         start: float = time.time()
-        self.log.debug("beginning conversion to postgres syntax")
+        logger.debug("beginning conversion to postgres syntax")
 
         # Iterate over each table and alter its schema
         for table, query in schema.items():
@@ -172,7 +161,7 @@ class Worker:
             # Assign the new schema back to the table
             # now the that is has been converted.
             query[0] = buffer
-            self.log.debug(f"'{table}' has been converted.")
+            logger.debug(f"'{table}' has been converted.")
 
         end: float = time.time()
 
@@ -200,31 +189,29 @@ class Worker:
             str: The text from the users confirmation
         """
 
-        self.log.debug(f"Input validation (attempt {bad_actor + 1}).")
+        logger.debug(f"Input validation (attempt {bad_actor + 1}).")
         validated: str = input(message)
 
         # Handle case where user inputs nothing.
-        while not validated:
+        while not validated or validated[0] not in "yYnN":
             bad_actor += 1
 
-            if bad_actor > 3:
-                self.log.error("Too many failed inputs. Exiting...")
+            if bad_actor >= 3:
+                logger.error("too many failed inputs. exiting...")
                 exit(1)
 
             validated = self.validate_input(message, bad_actor)
 
         if validated[0] not in "yY":
-            self.log.debug(f"User chose to exit with input: '{validated}'.")
-            self.log.info("Exiting...")
+            logger.debug(f"user chose to exit with input: '{validated}'.")
+            logger.info("exiting...")
             exit(0)
 
-        self.log.debug(f"User accepted with input: '{validated}'.")
+        logger.debug(f"user accepted with input: '{validated}'.")
         return validated
 
     def execute(self) -> None:
         """Execute the main logic of the program."""
-
-        print("<-- v**v -| SQLITE2PG |-- v**v -->")
 
         # Gather the sqlite schema from the database.
         sqlite_schema = self.get_sqlite_schema(self.test_sqlite_db)

@@ -12,7 +12,6 @@ Please refrain from using sqlite2pg for now. Thanks for reading.
  - An easy to use command line interface.
  - Options to accomodate different use cases.
  - Complete full migrations, or just generate schema.
- - Asynchronous, keeping performance in mind for big jobs.
 
 ## Installation
 

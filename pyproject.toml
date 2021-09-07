@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sqlite2pg"
-version = "0.1.1"
+version = "0.1.2"
 description = "An Sqlite3 to Postgresql database migration tool."
 license = "BSD-3-Clause"
 homepage = "https://github.com/Jonxslays/sqlite2pg"
@@ -28,19 +28,22 @@ classifiers = [
 ]
 
 [tool.poetry.scripts]
-sqlite2pg = "sqlite2pg.__main__:main"
+sqlite2pg = "sqlite2pg.cli:main"
 
 [tool.poetry.dependencies]
-python = ">=3.6,<=3.10"
+python = ">=3.6.2,<=3.10"
 aiosqlite = "^0.17.0"
 asyncpg = "^0.24.0"
 click = "^8.0.1"
+loguru = "^0.5.3"
+aiofiles = "^0.7.0"
 
 [tool.poetry.dev-dependencies]
 black = "^21.8b0"
 mypy = "^0.910"
 pytest = "^6.2.5"
 nox = "^2021.6.12"
+types-aiofiles = "^0.1.9"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

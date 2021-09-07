@@ -1,84 +1,107 @@
-import logging
-import time
+import asyncio
+import json
+import pathlib
 import typing
 
 import click
+from loguru import logger
 
-from sqlite2pg import LogConfig
+from sqlite2pg import S2PLogger
+from sqlite2pg import DEV_HOME_CONFIG, DEV_LOG_CONFIG
 
-__all__: typing.List[str] = [
+__all__:typing.List[str] = [
     "CommandHandler",
 ]
 
 
-log_lvls: typing.Mapping[str, int] = {
-    "notset": logging.NOTSET,
-    "debug": logging.DEBUG,
-    "info": logging.INFO,
-    "error": logging.ERROR,
-    "warn": logging.WARN,
-    "warning": logging.WARNING,
-    "critical": logging.CRITICAL,
-    "fatal": logging.FATAL,
+COMMANDS_DIR: str = "./sqlite2pg/commands"
+COMMANDS_FILES: typing.List[pathlib.Path] = [
+    *pathlib.Path(".").glob(f"{COMMANDS_DIR}/*.py")
+]
+
+ConfigSchemaT = typing.Mapping[str, typing.Mapping[str, typing.Union[str, bool, int]]]
+
+CONFIG_SCHEMA: ConfigSchemaT = {
+    "logging": {
+        "enable": True,
+        "level": "INFO",
+        "to_cwd": False,
+        "retention": 7,
+    }
 }
 
+class CommandHandler(click.MultiCommand):
+    def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
+        super().__init__(*args, **kwargs)
 
-class CommandHandler:
-    """Wrapper class for the command parser."""
 
-    __slots__: typing.Sequence[str] = ("log")
+    def list_commands(self, ctx: click.Context) -> typing.List[str]:
+        commands: typing.List[str] = []
+        commands.extend(p.stem for p in COMMANDS_FILES)
+        commands.sort()
 
-    @click.command(name="main")
-    @click.option(
-        "--log-file",
-        default=f"./slqlite2pg-{time.time():.0f}.log",
-        help="Path to the log file you would like to use."
-    )
-    @click.option(
-        "--log-lvl-file",
-        default="info",
-        help="The logging level to use for the log file."
-    )
-    @click.option(
-        "--log-lvl-stream",
-        default="info",
-        help="The logging level to use for the stream handler."
-    )
-    @click.option(
-        "--migrate",
-        is_flag=True,
-        help="Include a full data migration."
-    )
-    def main_cli(
-        log_file: click.Option,
-        log_lvl_file: click.Option,
-        log_lvl_stream: click.Option,
-        migrate: click.Option,
-    ) -> logging.Logger:
-        """An Sqlite3 to Postgresql database migration tool.
-        By default sqlite2pg will only generate schema. Please add the
-        --migration flag to migrate your data.
-        """
+        return commands
 
-        if log_lvl_file.lower() not in log_lvls.keys():
-            raise click.BadOptionUsage("log lvl file")
+    def get_command(self, ctx: click.Context, name: str) -> typing.Optional[click.Command]:
+        namespace: typing.Dict[str, object] = {}
+        filepath = pathlib.Path(f"{COMMANDS_DIR}/{name}.py")
 
-        if log_lvl_stream.lower() not in log_lvls.keys:
-            raise click.BadOptionUsage("log lvl stream")
+        with open(filepath, "r") as f:
+            code = compile(f.read(), filepath, "exec")
+            eval(code, namespace, namespace)
 
-        logger: logging.Logger = LogConfig.new(
-            log_file,
-            stream_level=log_lvls[log_lvl_stream],
-            file_level=log_lvls[log_lvl_file],
-        )
+        cmd = namespace.get("cli")
 
-        if migrate:
-            click.echo("were migrating")
+        return cmd if isinstance(cmd, click.Command) else None
 
-        click.echo(log_file)
-        click.echo(log_lvl_file)
-        click.echo(log_lvl_stream)
+    @staticmethod
+    def init_logging() -> None:
+        try:
+            with open(DEV_HOME_CONFIG / "config.json", "r") as f:
+                data: typing.MutableMapping[str, typing.Any] = json.loads(f.read())
 
-        click.echo("done")
+        except FileNotFoundError:
+            config_path = DEV_HOME_CONFIG / "config.json"
+            DEV_LOG_CONFIG.mkdir(parents=True, exist_ok=True)
+            config_path.touch()
 
-        return logger
+            schema = json.dumps(CONFIG_SCHEMA, indent=4, sort_keys=True)
+
+            with open(config_path, "w") as f2:
+                f2.write(schema)
+
+        except PermissionError:
+            click.echo(
+                f"{click.style('unable to access config file.', fg='red', bold=True)}\n"
+                "this is likely a permissions issue. please make sure the\n"
+                "sqlite2pg config.json exists, and has the correct permissions.\nusing bash: "
+                f"`{click.style('find / -wholename *sqlite2pg/config.json', fg='yellow', bold=True)}`"
+            )
+            click.secho("continuing anyways...", bold=True)
+
+            S2PLogger.configure(
+                enable=False,
+                to_cwd=False,
+                log_level="",
+                retention=0
+            )
+
+        else:
+            S2PLogger.configure(
+                enable = data["logging"]["enable"],
+                to_cwd = data["logging"]["to_cwd"],
+                log_level = data["logging"]["level"],
+                retention = data["logging"]["retention"],
+            )
+
+
+async def async_main() -> None:
+    await asyncio.sleep(0)
+
+    cli = CommandHandler(help="An Sqlite3 to Postgresql database migration tool.")
+    cli.init_logging()
+    cli()
+
+
+def main() -> None:
+    asyncio.run(async_main())
