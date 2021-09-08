@@ -27,9 +27,7 @@ class Worker:
             supplied automatically by the command line entry point.
     """
 
-    __slots__: typing.Sequence[str] = (
-        "test_sqlite_db",
-    )
+    __slots__: typing.Sequence[str] = ("test_sqlite_db",)
 
     def __init__(self) -> None:
         logger.debug("worker initialized...")
@@ -115,10 +113,6 @@ class Worker:
         conn.close()
 
         end: float = time.time()
-        print()
-
-        for s in clean_schema.values():
-            print(f"{s[0]}\n")
 
         logger.info(
             f"found {len(clean_schema)} tables and schema in {(end - start) * 1000:.4f} ms."

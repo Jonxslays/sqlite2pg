@@ -23,6 +23,7 @@ def cli(ctx: click.Context, test: bool) -> None:
     else:
         click.echo("CLIIIIIII from config")
 
+
 @cli.command(name="regen")
 @click.pass_obj
 def regen_command(obj: object) -> None:

@@ -9,15 +9,13 @@ from loguru import logger
 from sqlite2pg import S2PLogger
 from sqlite2pg import DEV_HOME_CONFIG, DEV_LOG_CONFIG
 
-__all__:typing.List[str] = [
+__all__: typing.List[str] = [
     "CommandHandler",
 ]
 
 
 COMMANDS_DIR: str = "./sqlite2pg/commands"
-COMMANDS_FILES: typing.List[pathlib.Path] = [
-    *pathlib.Path(".").glob(f"{COMMANDS_DIR}/*.py")
-]
+COMMANDS_FILES: typing.List[pathlib.Path] = [*pathlib.Path(".").glob(f"{COMMANDS_DIR}/*.py")]
 
 ConfigSchemaT = typing.Mapping[str, typing.Mapping[str, typing.Union[str, bool, int]]]
 
@@ -30,10 +28,10 @@ CONFIG_SCHEMA: ConfigSchemaT = {
     }
 }
 
+
 class CommandHandler(click.MultiCommand):
     def __init__(self, *args: typing.Any, **kwargs: typing.Any) -> None:
         super().__init__(*args, **kwargs)
-
 
     def list_commands(self, ctx: click.Context) -> typing.List[str]:
         commands: typing.List[str] = []
@@ -79,19 +77,14 @@ class CommandHandler(click.MultiCommand):
             )
             click.secho("continuing anyways...", bold=True)
 
-            S2PLogger.configure(
-                enable=False,
-                to_cwd=False,
-                log_level="",
-                retention=0
-            )
+            S2PLogger.configure(enable=False, to_cwd=False, log_level="", retention=0)
 
         else:
             S2PLogger.configure(
-                enable = data["logging"]["enable"],
-                to_cwd = data["logging"]["to_cwd"],
-                log_level = data["logging"]["level"],
-                retention = data["logging"]["retention"],
+                enable=data["logging"]["enable"],
+                to_cwd=data["logging"]["to_cwd"],
+                log_level=data["logging"]["level"],
+                retention=data["logging"]["retention"],
             )
 
 

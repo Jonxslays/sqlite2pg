@@ -15,7 +15,7 @@ Please refrain from using sqlite2pg for now. Thanks for reading.
 
 ## Installation
 
-sqlite2pg requires python 3.8.0 or greater.
+sqlite2pg requires python 3.8.2 or greater.
 
 To get started:
 ```bash

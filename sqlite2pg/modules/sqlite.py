@@ -7,20 +7,17 @@ __all__: typing.List[str] = [
 
 
 def get_tables() -> str:
-    return (
-        """
+    return """
         SELECT name FROM sqlite_master
         WHERE type IS 'table'
         AND name NOT LIKE 'sqlite_%'
         ORDER BY 1
         """
-    )
+
 
 def get_schema(table: str) -> str:
-    return (
-        f"""
+    return f"""
         SELECT sql
         FROM sqlite_master
         WHERE name='{table}'
         """
-    )

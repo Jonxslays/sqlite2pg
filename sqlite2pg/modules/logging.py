@@ -13,26 +13,13 @@ __all__: typing.List[str] = [
 ]
 
 
-LOG_FILE_FMT: str = "./slqlite2pg_{time}.log"
-
-
-LOG_LEVELS: typing.Mapping[str, int] = {
-    "TRACE": 5,
-    "DEBUG": 10,
-    "INFO": 20,
-    "SUCCESS": 25,
-    "WARNING": 30,
-    "ERROR": 40,
-    "CRITICAL": 50,
-}
+LOG_FILE_FMT: str = "./sqlite2pg.{time:X}.log"
 
 
 class S2PLogger:
     """Logging for the program."""
 
-    FORMAT: str = (
-        "<green>{time}</green> | <level>{level: <8}</level> ||| <level>{message}</level>"
-    )
+    FORMAT: str = "<green>{time}</green> | <level>{level: <8}</level> ||| <level>{message}</level>"
 
     @staticmethod
     def configure(
@@ -43,11 +30,11 @@ class S2PLogger:
     ) -> None:
         """Configures  logger object."""
 
+        logger.remove()
+
         if not enable:
             logger.disable("sqlite2pg")
             return
-
-        logger.remove()
 
         try:
             logger.add(
