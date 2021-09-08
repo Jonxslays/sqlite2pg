@@ -16,7 +16,7 @@ DEV_LOG_CONFIG = DEV_HOME_CONFIG / "logs"
 from .modules import *
 from .cli import *
 
-__version__: str = "0.1.3"
+__version__: str = "0.1.4"
 __author__: str = "Jonxslays"
 __maintainer__: str = "Jonxslays"
 __license__: str = "BSD-3-Clause"
