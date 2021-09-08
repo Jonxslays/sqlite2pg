@@ -6,12 +6,16 @@ import click
 from loguru import logger
 
 from sqlite2pg import Worker
+from sqlite2pg import CONFIG_SCHEMA
+from sqlite2pg import CleanSchemaT
 
 
 FILE_HEADER = """/*
 *
 * DATABASE:
 * '{}'
+*
+* This schema is in '{}' format.
 *
 * File created by sqlite2pg at {:.0f} epoch.
 * Use this generated file to import your schema at a later time.
@@ -22,12 +26,27 @@ FILE_HEADER = """/*
 
 @click.command(name="schema")
 @click.argument("database", type=click.Path(exists=True, path_type=Path))
-@click.option("-f", "--file", type=Path, help="the optional filepath to write the schema to.")
+@click.option("-f", "--file", type=Path, help="The optional PATH to write the schema to.")
+@click.option(
+    "-c",
+    "--convert",
+    is_flag=True,
+    default=False,
+    help="If added, this flag converts the schema to postgres syntax.",
+)
 @click.pass_context
-def cli(ctx: click.Context, file: Path, database: Path) -> None:
-    """Get table schema for an sqlite database."""
+def cli(ctx: click.Context, database: Path, file: Path, convert: bool) -> None:
+    """Get table schema from an sqlite DATABASE.
+    By default sqlite2pg will write the schema to stdout.
+
+    DATABASE The database to get the schema from.
+    """
 
     worker: Worker = Worker()
+    schema: CleanSchemaT = worker.get_sqlite_schema(database)
+
+    if convert:
+        schema = worker.convert_sqlite_to_pg(schema)
 
     if file:
         if file.is_dir():
@@ -40,17 +59,18 @@ def cli(ctx: click.Context, file: Path, database: Path) -> None:
             click.confirm(f"'{file}' exists. overwrite it?", default=False, abort=True)
             logger.debug("overwriting existing file in schema generation.")
 
-        schema: typing.Mapping[str, typing.List[str]] = worker.get_sqlite_schema(database)
-
         with open(file, "w", encoding="utf-8") as f:
-            f.write(FILE_HEADER.format(database, time.time()))
+            f.write(
+                FILE_HEADER.format(
+                    database,
+                    "PostgreSQL" if convert else "SQLite",
+                    time.time()),
+                )
 
             for t, s in schema.items():
-                f.write(f"\n-- Schema for table '{t}':\n{s[0]};\n")
+                f.write(f"\n-- Schema for table '{t}':\n{s[0]}\n")
 
     else:
-        schema: typing.Mapping[str, typing.List[str]] = worker.get_sqlite_schema(database)
-
         for t, s in schema.items():
-            click.secho(f"\nschema for table '{t}'", fg="green", bold=True)
+            click.secho(f"\n-- schema for table '{t}'", fg="green", bold=True)
             click.echo(f"{s[0]}")

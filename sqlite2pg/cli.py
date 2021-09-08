@@ -11,6 +11,7 @@ from sqlite2pg import DEV_HOME_CONFIG, DEV_LOG_CONFIG
 
 __all__: typing.List[str] = [
     "CommandHandler",
+    "CONFIG_SCHEMA",
 ]
 
 
@@ -91,7 +92,7 @@ class CommandHandler(click.MultiCommand):
 async def async_main() -> None:
     await asyncio.sleep(0)
 
-    cli = CommandHandler(help="An Sqlite3 to Postgresql database migration tool.")
+    cli = CommandHandler(help="An SQLite3 to PostgreSQL database migration tool.")
     cli.init_logging()
     cli()
 

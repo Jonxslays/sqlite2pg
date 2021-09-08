@@ -131,4 +131,5 @@ dmypy.json
 # Author
 .vscode/
 *.db*
-.config/*
+.config/
+test*.sql

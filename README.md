@@ -1,6 +1,6 @@
 # sqlite2pg
 
-An Sqlite3 to Postgresql database migration tool.
+An SQLite3 to PostgreSQL database migration tool.
 
 ## A warning
 

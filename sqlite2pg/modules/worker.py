@@ -10,6 +10,7 @@ from sqlite2pg.modules import sqlite
 
 __all__: typing.List[str] = [
     "Worker",
+    "CleanSchemaT",
 ]
 
 
@@ -106,7 +107,7 @@ class Worker:
         # of tuples with one string inside.
         # Add this list to the clean mapping.
         for t, q in raw_schema.items():
-            clean_schema[t] = [q[0][0].replace("\t", "    ")]
+            clean_schema[t] = [q[0][0].replace("\t", "    ") + ";"]
 
         # Close the connection to sqlite
         logger.debug(f"closed connection to sqlite: '{db}'.")
@@ -147,25 +148,12 @@ class Worker:
             buffer = buffer.replace("integer", "bigint")
             buffer = buffer.replace("INTEGER", "BIGINT")
 
-            # Append a semicolon to the query, if
-            # there is not already one there.
-            if buffer[-1] != ";":
-                buffer += ";"
-
             # Assign the new schema back to the table
             # now the that is has been converted.
             query[0] = buffer
             logger.debug(f"'{table}' has been converted.")
 
         end: float = time.time()
-
-        print(
-            f"converted {len(schema)} tables in {(end - start) * 1000:.4f} ms. obtained new schema."
-        )
-        print()
-
-        for s in schema.values():
-            print(f"{s[0]}\n")
 
         return schema
 

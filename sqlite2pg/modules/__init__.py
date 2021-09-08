@@ -14,4 +14,5 @@ __all__: typing.List[str] = [
     "get_tables",
     "get_schema",
     "Worker",
+    "CleanSchemaT",
 ]

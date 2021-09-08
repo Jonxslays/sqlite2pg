@@ -5,27 +5,24 @@ import click
 from loguru import logger
 
 from sqlite2pg import S2PLogger
+from sqlite2pg import CONFIG_SCHEMA
 
 
 @click.group(name="config", invoke_without_command=True)
-@click.option("-t", "--test", is_flag=True)
 @click.pass_context
-def cli(ctx: click.Context, test: bool) -> None:
-    """sqlite2pg configuration options."""
-
-    ctx.obj = "magic string"
-
-    if ctx.invoked_subcommand is None:
-        click.echo("there was no subcommand")
-
-    if test:
-        click.secho("IT WAS A TEST!!!", fg="green", bold=True)
-    else:
-        click.echo("CLIIIIIII from config")
+def cli(ctx: click.Context) -> None:
+    """Configure sqlite2pg."""
+    click.secho(
+        "The `config` subcommand has not been implemented yet.",
+        fg="red", bold=True,
+    )
 
 
 @cli.command(name="regen")
 @click.pass_obj
 def regen_command(obj: object) -> None:
     # prints "magic string"
-    click.echo(obj)
+    click.secho(
+        "The `config regen` subcommand has not been implemented yet.",
+        fg="red", bold=True,
+    )
