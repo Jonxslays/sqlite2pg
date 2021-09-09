@@ -1,12 +1,7 @@
-import typing
-from pathlib import Path
-
 import nox
 
 
-def install(session: nox.Session, dev: typing.Optional[bool] = False) -> nox.Session:
-    session.run("poetry", "shell", external=True)
-
+def install(session: nox.Session, dev: bool = False) -> nox.Session:
     if dev:
         session.run("poetry", "install", "-n", external=True)
     else:
@@ -17,7 +12,7 @@ def install(session: nox.Session, dev: typing.Optional[bool] = False) -> nox.Ses
 
 @nox.session(reuse_venv=True)
 def testing(session: nox.Session) -> None:
-    session = install(session)
+    session = install(session, True)
     session.run("pytest", "--verbose")
 
 
