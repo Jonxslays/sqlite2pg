@@ -1,8 +1,8 @@
 import typing
 
-from .sqlite import *
 from .errors import *
 from .logging import *
+from .sqlite import *
 from .worker import *
 
 __all__: typing.List[str] = [
@@ -15,4 +15,5 @@ __all__: typing.List[str] = [
     "get_schema",
     "Worker",
     "CleanSchemaT",
+    "sqlite",
 ]

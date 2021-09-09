@@ -13,8 +13,8 @@ else:
 DEV_HOME_CONFIG = Path(".") / ".config/sqlite2pg"
 DEV_LOG_CONFIG = DEV_HOME_CONFIG / "logs"
 
-from .modules import *
 from .cli import *
+from .modules import *
 
 __version__: str = "0.1.4"
 __author__: str = "Jonxslays"
@@ -40,4 +40,5 @@ __all__: typing.List[str] = [
     "DEV_LOG_CONFIG",
     "CONFIG_SCHEMA",
     "CleanSchemaT",
+    "sqlite",
 ]

@@ -1,12 +1,10 @@
-import logging
 import typing
 from datetime import timedelta
-from pathlib import Path
 
 import click
 from loguru import logger
 
-from sqlite2pg import DEV_HOME_CONFIG, DEV_LOG_CONFIG
+from sqlite2pg import DEV_LOG_CONFIG
 
 __all__: typing.List[str] = [
     "S2PLogger",

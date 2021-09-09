@@ -1,14 +1,10 @@
 import time
-import typing
 from pathlib import Path
 
 import click
 from loguru import logger
 
-from sqlite2pg import Worker
-from sqlite2pg import CONFIG_SCHEMA
-from sqlite2pg import CleanSchemaT
-
+from sqlite2pg import CleanSchemaT, Worker
 
 FILE_HEADER = """/*
 *
@@ -35,7 +31,7 @@ FILE_HEADER = """/*
     help="If added, this flag converts the schema to postgres syntax.",
 )
 @click.pass_context
-def cli(ctx: click.Context, database: Path, file: Path, convert: bool) -> None:
+def schema(ctx: click.Context, database: Path, file: Path, convert: bool) -> None:
     """Get table schema from an sqlite DATABASE.
     By default sqlite2pg will write the schema to stdout.
 
@@ -61,11 +57,8 @@ def cli(ctx: click.Context, database: Path, file: Path, convert: bool) -> None:
 
         with open(file, "w", encoding="utf-8") as f:
             f.write(
-                FILE_HEADER.format(
-                    database,
-                    "PostgreSQL" if convert else "SQLite",
-                    time.time()),
-                )
+                FILE_HEADER.format(database, "PostgreSQL" if convert else "SQLite", time.time()),
+            )
 
             for t, s in schema.items():
                 f.write(f"\n-- Schema for table '{t}':\n{s[0]}\n")

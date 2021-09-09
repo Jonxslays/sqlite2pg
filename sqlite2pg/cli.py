@@ -4,10 +4,9 @@ import pathlib
 import typing
 
 import click
-from loguru import logger
 
-from sqlite2pg import S2PLogger
 from sqlite2pg import DEV_HOME_CONFIG, DEV_LOG_CONFIG
+from sqlite2pg.modules import S2PLogger
 
 __all__: typing.List[str] = [
     "CommandHandler",
@@ -49,7 +48,7 @@ class CommandHandler(click.MultiCommand):
             code = compile(f.read(), filepath, "exec")
             eval(code, namespace, namespace)
 
-        cmd = namespace.get("cli")
+        cmd = namespace.get(name)
 
         return cmd if isinstance(cmd, click.Command) else None
 

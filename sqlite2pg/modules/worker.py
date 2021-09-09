@@ -1,8 +1,8 @@
-import logging
 import os
 import sqlite3
 import time
 import typing
+from pathlib import Path
 
 from loguru import logger
 
@@ -32,9 +32,9 @@ class Worker:
 
     def __init__(self) -> None:
         logger.debug("worker initialized...")
-        self.test_sqlite_db = "./database.db3"
+        self.test_sqlite_db: Path = Path("./database.db3")
 
-    def get_sqlite_schema(self, db: str) -> CleanSchemaT:
+    def get_sqlite_schema(self, db: Path) -> CleanSchemaT:
         """Gets the schema for a given sqlite3 database.3
 
         Args:

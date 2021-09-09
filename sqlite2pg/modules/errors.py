@@ -1,6 +1,4 @@
-import abc
 import typing
-
 
 __all__: typing.List[str] = [
     "Sqlite2pgError",
