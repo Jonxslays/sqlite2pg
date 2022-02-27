@@ -1,8 +1,8 @@
+import sys
 import time
 from pathlib import Path
 
 import click
-from loguru import logger
 
 from sqlite2pg import CleanSchemaT, Worker
 
@@ -46,14 +46,13 @@ def schema(ctx: click.Context, database: Path, file: Path, convert: bool) -> Non
 
     if file:
         if file.is_dir():
-            logger.error("attempted to write schema to a directory. exiting...")
+            sys.stderr.write("attempted to write schema to a directory. exiting...")
             click.secho("ERROR:", fg="red", bold=True)
             click.echo(f"can't write schema to '{file}'. it is a directory.")
             return
 
         elif file.exists():
             click.confirm(f"'{file}' exists. overwrite it?", default=False, abort=True)
-            logger.debug("overwriting existing file in schema generation.")
 
         with open(file, "w", encoding="utf-8") as f:
             f.write(
