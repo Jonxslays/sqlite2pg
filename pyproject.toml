@@ -44,7 +44,7 @@ asyncpg = ">=0.24,<0.26"
 click = "^8.0.1"
 
 [tool.poetry.dev-dependencies]
-mypy = "^0.931"
+mypy = "^0.941"
 nox = "^2022.1.7"
 pytest = "^6.2.5"
 types-aiofiles = "^0.8.5"
