@@ -40,7 +40,7 @@ sqlite2pg = "sqlite2pg.cli:main"
 python = ">=3.6,<3.12"
 aiofiles = "^0.7.0"
 aiosqlite = "^0.17.0"
-asyncpg = "^0.24.0"
+asyncpg = ">=0.24,<0.26"
 click = "^8.0.1"
 
 [tool.poetry.dev-dependencies]
