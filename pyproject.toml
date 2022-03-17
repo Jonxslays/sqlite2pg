@@ -47,7 +47,7 @@ click = "^8.0.1"
 mypy = "^0.931"
 nox = "^2021.6.12"
 pytest = "^6.2.5"
-types-aiofiles = "^0.1.9"
+types-aiofiles = "^0.8.5"
 flake8 = "^3.9.2"
 
 [tool.poetry.dev-dependencies.black]
